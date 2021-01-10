@@ -33,7 +33,6 @@ if [ ! -f .repo_env ]; then
   echo "selec index repo:"
   read RepoIndex
   echo "IndexRepoName=${RepoList[${RepoIndex}]}" > .repo_env
-  echo ".repo_env" >> .gitignore
 fi
 IndexRepoName=`ReadEnv .repo_env "IndexRepoName"`
 
