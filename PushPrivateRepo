@@ -1,0 +1,99 @@
+#!/bin/bash
+
+GitPath=`git config --get remote.origin.url`
+RepoName=`basename ${GitPath}`
+RepoName=${RepoName%.*}
+
+ReadEnv() {
+  UploadEnvPath=$1
+  ItemName=$2
+  
+  if [ ! -f "${UploadEnvPath}" ]; then
+    echo ""
+    exit 0
+  fi
+  
+  while read Line; do
+    if [[ "${Line}" == *"${ItemName}"* ]]; then
+      echo ${Line/${ItemName}\=/}
+    fi
+  done < "${UploadEnvPath}"
+}
+
+# setup IndexRepoName
+if [ ! -f .repo_env ]; then
+  RepoList=(`ls ~/.cocoapods/repos`)
+  
+  length=${#RepoList[@]}
+  for ((index=0; index<length; index++)); do
+    echo "  (${index}) ${RepoList[$index]}"
+  done
+  
+  RepoIndex=0
+  echo "selec index repo:"
+  read RepoIndex
+  echo "IndexRepoName=${RepoList[${RepoIndex}]}" > .repo_env
+  echo ".repo_env" >> .gitignore
+fi
+IndexRepoName=`ReadEnv .repo_env "IndexRepoName"`
+
+# setup repo version
+OriginRepoVersion="1"
+NewRepoVersion="1"
+if [ ! -f "./${RepoName}.podspec" ]; then
+  echo "
+Pod::Spec.new do |s|
+  s.name         = \"${RepoName}\"
+  s.version      = \"1\"
+  s.swift_version = '5.3'
+  s.summary      = \"${RepoName}.\"
+  s.description  = <<-DESC
+                    this is ${RepoName}
+                   DESC
+  s.homepage     = \"https://casatwy.com\"
+  s.license      = { :type => \"MIT\" }
+  s.author             = { \"CasaTaloyum\" => \"casatwy@msn.com\" }
+  s.platform     = :ios, \"13.0\"
+  s.source       = { :git => \"${GitPath}\", :tag => s.version.to_s }
+  s.source_files  = \"${RepoName}/Source/**/*.{h,m,swift}\"
+  s.requires_arc = true
+
+  s.dependency \"SwiftHandyFrame\"
+end" > ${RepoName}.podspec
+
+  cat "${RepoName}.podspec"
+  confirm=""
+  read -p "satisfied?(y/n)" confirm
+  if [ ! "${confirm}" == "y" ]; then
+    exit 1
+  fi
+else
+  OriginRepoVersion=`grep -Eo "[a-zA-Z]+\.version.*=.*" ${RepoName}.podspec | cut -d "=" -f2 | grep -Eo "[a-zA-Z.0-9]+"`
+  NewRepoVersion=$((OriginRepoVersion+1))
+  VersionLineNumber=`grep -nE 's.version.*=' ${RepoName}.podspec | cut -d : -f1`
+  sed -i "" "${VersionLineNumber}s/${OriginRepoVersion}/${NewRepoVersion}/g" ${RepoName}.podspec
+  cat ${RepoName}.podspec
+fi
+
+# do git operations
+git stash
+git pull origin $(git rev-parse --abbrev-ref HEAD) --tags
+git stash pop
+git add .
+git commit -am "${NewRepoVersion}"
+git tag ${NewRepoVersion}
+git push origin $(git rev-parse --abbrev-ref HEAD) --tags
+
+IndexRepoDir="~/.cocoapods/repos/${IndexRepoName}/${RepoName}/${NewRepoVersion}"
+pushd "$IndexRepoDir"
+git pull origin $(git rev-parse --abbrev-ref HEAD)
+popd
+
+mkdir -p "${IndexRepoDir}"
+cp ${RepoName}.podspec "${IndexRepoDir}"
+
+pushd "$IndexRepoDir"
+git add .
+git commit -am "${RepoName} ${NewRepoVersion} released"
+git push origin $(git rev-parse --abbrev-ref HEAD)
+popd
