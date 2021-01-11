@@ -53,7 +53,7 @@ IndexRepoName=`ReadEnv .repo_env "IndexRepoName"`
 OriginRepoVersion="1"
 NewRepoVersion="1"
 if [ ! -f "./${RepoName}.podspec" ]; then
-  echo "
+  echo "# podspec file
 Pod::Spec.new do |s|
   s.name         = \"${RepoName}\"
   s.version      = \"1\"
