@@ -1,8 +1,14 @@
 #!/bin/bash
 
 GitPath=`git config --get remote.origin.url`
+if [ ${#GitPath} -eq 0 ]; then
+  echo "can not find git path."
+  exit 1
+fi
+
 RepoName=`basename ${GitPath}`
 RepoName=${RepoName%.*}
+
 
 ReadEnv() {
   UploadEnvPath=$1
@@ -33,6 +39,14 @@ if [ ! -f .repo_env ]; then
   echo "selec index repo:"
   read RepoIndex
   echo "IndexRepoName=${RepoList[${RepoIndex}]}" > .repo_env
+
+  echo "${RepoName}.xcodeproj/xcuserdata/
+${RepoName}.xcworkspace/
+${RepoName}.xcodeproj/project.xcworkspace/xcuserdata/
+Pods/
+*.swp
+.DS_Store
+" > .gitignore
 fi
 IndexRepoName=`ReadEnv .repo_env "IndexRepoName"`
 
