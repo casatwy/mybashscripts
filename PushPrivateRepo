@@ -45,8 +45,7 @@ ${RepoName}.xcworkspace/
 ${RepoName}.xcodeproj/project.xcworkspace/xcuserdata/
 Pods/
 *.swp
-.DS_Store
-" > .gitignore
+.DS_Store" > .gitignore
 fi
 IndexRepoName=`ReadEnv .repo_env "IndexRepoName"`
 
