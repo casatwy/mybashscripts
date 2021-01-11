@@ -83,12 +83,13 @@ git commit -am "${NewRepoVersion}"
 git tag ${NewRepoVersion}
 git push origin $(git rev-parse --abbrev-ref HEAD) --tags
 
-IndexRepoDir="~/.cocoapods/repos/${IndexRepoName}/${RepoName}/${NewRepoVersion}"
+IndexRepoDir="${HOME}/.cocoapods/repos/${IndexRepoName}/${RepoName}/${NewRepoVersion}"
+mkdir -p "${IndexRepoDir}"
+
 pushd "$IndexRepoDir"
 git pull origin $(git rev-parse --abbrev-ref HEAD)
 popd
 
-mkdir -p "${IndexRepoDir}"
 cp ${RepoName}.podspec "${IndexRepoDir}"
 
 pushd "$IndexRepoDir"
