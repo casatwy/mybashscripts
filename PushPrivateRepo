@@ -46,6 +46,14 @@ ${RepoName}.xcodeproj/project.xcworkspace/xcuserdata/
 Pods/
 *.swp
 .DS_Store" > .gitignore
+
+git rm --cached ${RepoName}.xcodeproj/xcuserdata/
+git rm --cached ${RepoName}.xcworkspace/
+git rm --cached ${RepoName}.xcodeproj/project.xcworkspace/xcuserdata/
+git rm --cached Pods/
+git rm --cached *.swp
+git rm --cached .DS_Store
+
 fi
 IndexRepoName=`ReadEnv .repo_env "IndexRepoName"`
 
