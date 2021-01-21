@@ -95,7 +95,9 @@ else
 fi
 
 # do git operations
-rm .git/hooks/*
+if [ -d .git/hooks ]; then
+  rm .git/hooks/*
+fi
 git stash
 git pull origin $(git rev-parse --abbrev-ref HEAD) --tags
 git stash pop
